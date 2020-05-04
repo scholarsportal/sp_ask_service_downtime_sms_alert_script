@@ -9,7 +9,10 @@ import sys
 #package installed
 from peewee import *
 import requests
+
+#this is twilio Client not LH3
 from twilio.rest import Client
+
 from environs import Env
 env = Env()
 # Read .env into os.environ
@@ -94,6 +97,7 @@ def send_sms(web, clavardez, sms):
     account_sid = env("ACCOUNT_SID")
     auth_token = env("AUTH_TOKEN")
     client = Client(account_sid, auth_token)
+    #send message
     message = client.messages.create(
         body="Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms),
         from_=env("FROM"),
