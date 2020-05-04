@@ -39,7 +39,8 @@ make setup
 make run
 ```
 In addition it is useful to execute it from **crontab**
-`*/15 * * * * python sp_ask_service_availability_alert.py`
+`*/10 * * * * python sp_ask_service_availability_alert.py`
+
 
 ## Requirement
 1.  This script requires a TWILIO account credentials to send SMS 
@@ -70,4 +71,5 @@ docker build -t ask-sms-app .
 2.  Add tests
 3.  Add Cronjob in Dockerfile
 4.  Move the logic to create a Mobile app
+
 
