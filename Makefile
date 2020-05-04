@@ -18,6 +18,7 @@ info-readme:
 
 .PHONY: setup
 setup:
+	pip install poetry
 	poetry install -v
 	poetry run python sp_ask_service_availability_alert.py
 info-setup:
