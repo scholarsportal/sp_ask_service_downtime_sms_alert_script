@@ -142,7 +142,7 @@ def find_opening_hours_for_today():
 def service_vailability_alert():
     """Main function
     """
-    min_alert_minute = 10
+    min_alert_minute = 8
     try:
         Service.delete().execute()
     except:
