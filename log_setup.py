@@ -11,7 +11,7 @@ import sys
 
 #Installed packages
 import pytz
-import requests 
+import requests
 
 fmt_date = '%Y-%m-%d'
 fmt_hour = '%H:%M:%S'
@@ -22,7 +22,7 @@ eastern = timezone('America/Montreal')
 def get_log_formatter():
     # https://tutorialedge.net/python/python-logging-best-practices/
     log_formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(filename)s:%(funcName)s:%(lineno)d] %(message)s')
-    logFile = './log.log'
+    logFile = './sms_alert.log'
     my_handler = RotatingFileHandler(
         logFile, mode='a', maxBytes=5*1024*1024,
         backupCount=2, encoding=None, delay=0)

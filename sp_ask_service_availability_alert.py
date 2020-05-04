@@ -32,7 +32,7 @@ class Service(Model):
     """Database Table
         Record queue/service and their Status to
         AVAILABLE,
-        UNAVAILABLE, 
+        UNAVAILABLE,
     """
     queue = CharField(max_length=30, null=False)
     status = CharField(max_length=30, null=False)
@@ -51,7 +51,7 @@ def check_service_and_insert_to_db():
     """Each minutes during Opening Hours
         a script ping the Main
         queues to know their status
-        
+
         -scholars-portal-txt
         -scholars-portal
         -clavardez
@@ -118,6 +118,7 @@ def verify_Ask_service(min_alert_minute):
         web = len(Service.select().where((Service.status=="unavailable") and (Service.queue=="scholars-portal")))
         print("Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms))
         send_sms(web, clavardez, sms)
+        app_log.info("sent a sms")
         sys.exit()
 
 def is_hour_between(start, end, now):
@@ -142,20 +143,24 @@ def service_vailability_alert():
     """Main function
     """
     min_alert_minute = 10
-    Service.delete().execute() 
+    try:
+        Service.delete().execute()
+    except:
+        Service.create_table()
     counter = 0
     while counter < min_alert_minute:
         get_presence()
         time.sleep(60) #sleep one minute
         counter +=1
-    
+
     # After 10 min .. check this
     verify_Ask_service(min_alert_minute)
 
 if __name__ == '__main__':
+    app_log.info("Executing alert script")
     start, end = find_opening_hours_for_today()
     current_hour = datetime.today().hour
-    
+
     # Run only on Ask open hours
     if (current_hour >= start) and (current_hour <= end):
         app_log.info("withing Ask opening hours")
