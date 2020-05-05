@@ -175,6 +175,12 @@ def service_availability_alert():
     """
     min_alert_minute = 8
     time_to_sleep = 60
+    environment = env("ENVIRONMENT", "STAGING")
+    if environment == "STAGING":
+        print("Staging environment")
+        min_alert_minute = 8
+        time_to_sleep = 10
+
     Service.create_table()
     Service.delete().execute() 
     counter = 0
