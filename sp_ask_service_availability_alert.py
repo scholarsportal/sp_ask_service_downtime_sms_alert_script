@@ -173,8 +173,8 @@ def service_availability_alert():
     """Main function
     Verify the status of all service
     """
-    min_alert_minute = 3
-    time_to_sleep = 10
+    min_alert_minute = 8
+    time_to_sleep = 60
     Service.create_table()
     Service.delete().execute() 
     counter = 0
