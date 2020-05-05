@@ -145,7 +145,10 @@ def verify_Ask_service(min_alert_minute):
         sys.exit()
 
     #if OFF hours
-    send_sms_during_off_hours(min_alert_minute)
+    start, end = find_opening_hours_for_today()
+    current_hour = datetime.today().hour
+    if (current_hour <= start) and (current_hour >= end):
+        send_sms_during_off_hours(min_alert_minute)
 
 def is_hour_between(start, end, now):
     is_between = False
@@ -178,7 +181,7 @@ def service_availability_alert():
     environment = env("ENVIRONMENT", "STAGING")
     if environment == "STAGING":
         print("Staging environment")
-        min_alert_minute = 8
+        min_alert_minute = 5
         time_to_sleep = 10
 
     Service.create_table()
