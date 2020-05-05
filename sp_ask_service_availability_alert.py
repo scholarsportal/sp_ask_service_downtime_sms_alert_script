@@ -32,7 +32,7 @@ class Service(Model):
     """Database Table
         Record queue/service and their Status to
         AVAILABLE,
-        UNAVAILABLE, 
+        UNAVAILABLE,
     """
     queue = CharField(max_length=30, null=False)
     status = CharField(max_length=30, null=False)
@@ -51,7 +51,7 @@ def check_service_and_insert_to_db():
     """Each minutes during Opening Hours
         a script ping the Main
         queues to know their status
-        
+
         -scholars-portal-txt
         -scholars-portal
         -clavardez
@@ -91,11 +91,17 @@ def send_sms(web, clavardez, sms):
         clavardez {int} -- Number of Downtime in minutes
         sms {int} -- Number of Downtime in minutes
     """
+    now = datetime.now().time()
+    hour = now.hour
+    minute = now.minute
+    second = now.minute
+    time_now = str(hour) +":"+ str(minute) + ":" + str(second)
+
     account_sid = env("ACCOUNT_SID")
     auth_token = env("AUTH_TOKEN")
     client = Client(account_sid, auth_token)
     message = client.messages.create(
-        body="Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms),
+            body="Sent: {0}\nAsk Service Downtime\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms),
         from_=env("FROM"),
         to=env("TO")
     )
@@ -109,13 +115,14 @@ def verify_Ask_service(min_alert_minute):
         min_alert_minute {int} -- Minimum minute of downtime
     """
     #retrieve how many time those services were 'unavailable'
-    fr_result = Service.select().where((Service.status !="available") and (Service.queue=="clavardez"))
-    sms_result = Service.select().where((Service.status !="available") and (Service.queue=="scholars-portal-txt"))
+    status = ["away", "dnd"]
+    fr_result = Service.select().where((Service.status !="available") & (Service.queue=="clavardez"))
+    sms_result = Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt"))
 
     if (len(fr_result) >= min_alert_minute) | (len(sms_result) >= min_alert_minute) :
-        clavardez = len(Service.select().where((Service.status !="available") and (Service.queue=="clavardez")))
-        sms = len(Service.select().where((Service.status !="available") and (Service.queue=="scholars-portal-txt")))
-        web = len(Service.select().where((Service.status !="available") and (Service.queue=="scholars-portal")))
+        clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
+        sms = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt")))
+        web = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal")))
         print("Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms))
         send_sms(web, clavardez, sms)
         app_log.info("Have sent an SMS")
@@ -149,14 +156,14 @@ def service_vailability_alert():
     min_alert_minute = 8
     time_to_sleep = 60
     Service.create_table()
-    Service.delete().execute() 
+    Service.delete().execute()
     counter = 0
     while counter < min_alert_minute:
         get_presence()
         time.sleep(time_to_sleep) #sleep one minute
         app_log.info("sleeping for {0} seconds".format(time_to_sleep))
         counter +=1
-    
+
     # After 10 min .. check this
     verify_Ask_service(min_alert_minute)
 
@@ -164,11 +171,12 @@ if __name__ == '__main__':
     app_log.info("Enter sms-app")
     start, end = find_opening_hours_for_today()
     current_hour = datetime.today().hour
-    
+
     # Run only on Ask open hours
     if (current_hour >= start) and (current_hour <= end):
         app_log.info("within Ask opening hours")
         print("whitin Ask opening hours")
         service_vailability_alert()
+
 
 

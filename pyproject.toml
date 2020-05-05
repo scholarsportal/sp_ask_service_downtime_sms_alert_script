@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "sp_ask_service_availability_alert"
+name = "sp_ask_service_downtime_sms_alert_script"
 version = "0.1.3"
 description = ""
 authors = ["Guinsly Mondesir <guinslym@gmail.com>"]
