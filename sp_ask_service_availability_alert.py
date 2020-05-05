@@ -9,10 +9,7 @@ import sys
 #package installed
 from peewee import *
 import requests
-
-#this is twilio Client not LH3
 from twilio.rest import Client
-
 from environs import Env
 env = Env()
 # Read .env into os.environ
@@ -35,7 +32,7 @@ class Service(Model):
     """Database Table
         Record queue/service and their Status to
         AVAILABLE,
-        UNAVAILABLE,
+        UNAVAILABLE, 
     """
     queue = CharField(max_length=30, null=False)
     status = CharField(max_length=30, null=False)
@@ -54,7 +51,7 @@ def check_service_and_insert_to_db():
     """Each minutes during Opening Hours
         a script ping the Main
         queues to know their status
-
+        
         -scholars-portal-txt
         -scholars-portal
         -clavardez
@@ -97,7 +94,6 @@ def send_sms(web, clavardez, sms):
     account_sid = env("ACCOUNT_SID")
     auth_token = env("AUTH_TOKEN")
     client = Client(account_sid, auth_token)
-    #send message
     message = client.messages.create(
         body="Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms),
         from_=env("FROM"),
@@ -113,16 +109,16 @@ def verify_Ask_service(min_alert_minute):
         min_alert_minute {int} -- Minimum minute of downtime
     """
     #retrieve how many time those services were 'unavailable'
-    fr_result = Service.select().where((Service.status=="unavailable") and (Service.queue=="clavardez"))
-    sms_result = Service.select().where((Service.status=="unavailable") and (Service.queue=="scholars-portal-txt"))
+    fr_result = Service.select().where((Service.status !="available") and (Service.queue=="clavardez"))
+    sms_result = Service.select().where((Service.status !="available") and (Service.queue=="scholars-portal-txt"))
 
     if (len(fr_result) >= min_alert_minute) | (len(sms_result) >= min_alert_minute) :
-        clavardez = len(Service.select().where((Service.status=="unavailable") and (Service.queue=="clavardez")))
-        sms = len(Service.select().where((Service.status=="unavailable") and (Service.queue=="scholars-portal-txt")))
-        web = len(Service.select().where((Service.status=="unavailable") and (Service.queue=="scholars-portal")))
+        clavardez = len(Service.select().where((Service.status !="available") and (Service.queue=="clavardez")))
+        sms = len(Service.select().where((Service.status !="available") and (Service.queue=="scholars-portal-txt")))
+        web = len(Service.select().where((Service.status !="available") and (Service.queue=="scholars-portal")))
         print("Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms))
         send_sms(web, clavardez, sms)
-        app_log.info("sent a sms")
+        app_log.info("Have sent an SMS")
         sys.exit()
 
 def is_hour_between(start, end, now):
@@ -135,10 +131,14 @@ def is_hour_between(start, end, now):
 
 def find_opening_hours_for_today():
     day = datetime.today().weekday()
-    if day >= 1 and day < 5:
+
+    #Monday to Friday
+    if day >= 0 and day < 4:
         return [10, 19]
+    #Saturday
     elif day == 5:
         return [10, 17]
+    #Sunday
     else:
         #weekend
         return [12, 17]
@@ -147,28 +147,28 @@ def service_vailability_alert():
     """Main function
     """
     min_alert_minute = 8
-    try:
-        Service.delete().execute()
-    except:
-        Service.create_table()
+    time_to_sleep = 60
+    Service.create_table()
+    Service.delete().execute() 
     counter = 0
     while counter < min_alert_minute:
         get_presence()
-        time.sleep(60) #sleep one minute
+        time.sleep(time_to_sleep) #sleep one minute
+        app_log.info("sleeping for {0} seconds".format(time_to_sleep))
         counter +=1
-
+    
     # After 10 min .. check this
     verify_Ask_service(min_alert_minute)
 
 if __name__ == '__main__':
-    app_log.info("Executing alert script")
+    app_log.info("Enter sms-app")
     start, end = find_opening_hours_for_today()
     current_hour = datetime.today().hour
-
+    
     # Run only on Ask open hours
     if (current_hour >= start) and (current_hour <= end):
-        app_log.info("withing Ask opening hours")
+        app_log.info("within Ask opening hours")
+        print("whitin Ask opening hours")
         service_vailability_alert()
-
 
 
