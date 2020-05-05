@@ -68,6 +68,7 @@ docker build -t ask-sms-app .
 ## Todo
 
 1.  Replace SMS with email to ASK SP inbox
+2.  Add staging and production environment variables
 2.  Add tests
 3.  Add Cronjob in Dockerfile
 4.  Move the logic to create a [Mobile app](https://github.com/guinslym/sp_ask_dashboard_mobile_app_layout)
