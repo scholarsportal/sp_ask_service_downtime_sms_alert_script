@@ -107,6 +107,13 @@ def send_sms(web, clavardez, sms):
     )
 
 def send_sms_during_off_hours(min_alert_minute):
+    """Send SMS is the status is different than 
+    UNAVAILABLE
+    during off hours
+
+    Arguments:
+        min_alert_minute {[int]} -- Minimum minute of uptime
+    """
     result = Service.select().where((Service.status !="unavailable"))
     if (len(result) >= min_alert_minute) :
         clavardez = len(Service.select().where((Service.status !="unavailable") & (Service.queue=="clavardez")))
@@ -164,6 +171,7 @@ def find_opening_hours_for_today():
 
 def service_availability_alert():
     """Main function
+    Verify the status of all service
     """
     min_alert_minute = 3
     time_to_sleep = 10
