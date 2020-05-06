@@ -10,7 +10,6 @@ from sp_ask_service_availability_alert import find_opening_hours_for_today
 from sp_ask_service_availability_alert import send_sms
 from sp_ask_service_availability_alert import send_sms_during_off_hours
 from sp_ask_service_availability_alert import verify_Ask_service
-from sp_ask_service_availability_alert import service_availability_alert
 
 from freezegun import freeze_time
 import datetime
@@ -77,3 +76,5 @@ def test_send_sms_during_off_hours(mocker):
     mocker.patch('client.messages.create')
     send_sms_during_off_hours(3, 3, 3)
     client.messages.create.assert_called_once_with(3,3,3)
+
+
