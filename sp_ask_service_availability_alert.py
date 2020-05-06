@@ -66,6 +66,18 @@ def check_service_and_insert_to_db():
             app_log.error("Can't add value in database"+ str(e) )
             pass
 
+def check_if_the_service_open():
+    """Verify if the service is currently open
+
+    Returns:
+        [Boolean] -- If the service is open?
+    """    
+    start, end = find_opening_hours_for_today()
+    current_hour = datetime.today().hour
+
+    result = (current_hour >= start) and (current_hour <= end)
+    return result
+
 def get_presence():
     """Insert the presence status in DB
     Go online and check each Service Presence Status
@@ -131,11 +143,9 @@ def verify_Ask_service(min_alert_minute):
     Arguments:
         min_alert_minute {int} -- Minimum minute of downtime
     """
-    start, end = find_opening_hours_for_today()
-    current_hour = datetime.today().hour
-    ask_opening_hours = (current_hour >= start) and (current_hour <= end)
+    is_within_Ask_openning_hours = check_if_the_service_open()
 
-    if ask_opening_hours == True:
+    if is_within_Ask_openning_hours == True:
         #retrieve how many time those services were 'unavailable'
         fr_result = Service.select().where((Service.status !="available") & (Service.queue=="clavardez"))
         sms_result = Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt"))
@@ -150,7 +160,7 @@ def verify_Ask_service(min_alert_minute):
             sys.exit()
 
     #if OFF hours
-    if ask_opening_hours == False:
+    if is_within_Ask_openning_hours == False:
         send_sms_during_off_hours(min_alert_minute)
 
 def is_hour_between(start, end, now):
@@ -201,11 +211,10 @@ def service_availability_alert():
 
 if __name__ == '__main__':
     app_log.info("Enter sms-app")
-    start, end = find_opening_hours_for_today()
-    current_hour = datetime.today().hour
+    is_within_Ask_openning_hours = check_if_the_service_open()
     
     # Run only on Ask open hours
-    if (current_hour >= start) and (current_hour <= end):
+    if is_within_Ask_openning_hours:
         app_log.info("within Ask opening hours")
         print("whitin Ask opening hours")
         service_availability_alert()
