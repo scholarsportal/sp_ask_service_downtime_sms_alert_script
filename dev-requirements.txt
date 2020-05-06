@@ -7,3 +7,4 @@ pytz
 pytest
 pdbpp
 ptpython
+pytest-sugar
