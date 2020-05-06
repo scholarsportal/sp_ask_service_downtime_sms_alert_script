@@ -16,6 +16,7 @@ from freezegun import freeze_time
 import datetime
 import unittest
 from twilio.rest import Client
+import pytest
 
 
 def test_version():
@@ -59,10 +60,20 @@ def test_find_opening_hours_for_today():
     result = find_opening_hours_for_today(time_now)    
     assert [10, 19] == result   
 
+@pytest.mark.skip(reason="Need a valid target to patch for Client")
 def test_send_sms(mocker):
     mocker.patch('Client')
     client = Client("9999", "909099")
 
     mocker.patch('client.messages.create')
     send_sms(3, 3, 3)
+    client.messages.create.assert_called_once_with(3,3,3)
+
+@pytest.mark.skip(reason="Need a valid target to patch for Client")
+def test_send_sms_during_off_hours(mocker):
+    mocker.patch('Client')
+    client = Client("9999", "909099")
+
+    mocker.patch('client.messages.create')
+    send_sms_during_off_hours(3, 3, 3)
     client.messages.create.assert_called_once_with(3,3,3)
