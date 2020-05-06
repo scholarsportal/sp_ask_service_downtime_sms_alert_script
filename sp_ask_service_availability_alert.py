@@ -14,6 +14,8 @@ from environs import Env
 env = Env()
 # Read .env into os.environ
 env.read_env()
+account_sid = env("ACCOUNT_SID", 'fdghdfgh')
+auth_token = env("AUTH_TOKEN", 'rter')
 
 #loggin system
 from log_setup import get_log_formatter
@@ -105,8 +107,7 @@ def send_sms(web, clavardez, sms):
     """
     time_now = time.strftime('%X %Z %x')
 
-    account_sid = env("ACCOUNT_SID")
-    auth_token = env("AUTH_TOKEN")
+
     client = Client(account_sid, auth_token)
     message = client.messages.create(
             body="Sent: {0}\nAsk Service Downtime\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms),

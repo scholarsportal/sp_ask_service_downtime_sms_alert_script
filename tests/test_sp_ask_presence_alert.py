@@ -14,9 +14,9 @@ from sp_ask_service_availability_alert import verify_Ask_service
 from freezegun import freeze_time
 import datetime
 import unittest
+import twilio
 from twilio.rest import Client
 import pytest
-
 
 def test_version():
     assert __version__ == '0.1.3'
@@ -59,12 +59,21 @@ def test_find_opening_hours_for_today():
     result = find_opening_hours_for_today(time_now)    
     assert [10, 19] == result   
 
+def test_normalize_sms_address():
+        twilio = _twilio_client()
+        assert(twilio._normalize_sms_address(
+            sms_phone_number='555-123-4567'
+        ),
+            '+15551234567')
+
+
+
 @pytest.mark.skip(reason="Need a valid target to patch for Client")
 def test_send_sms(mocker):
-    mocker.patch('Client')
+    mocker.patch('twilio.rest.Client')
     client = Client("9999", "909099")
 
-    mocker.patch('client.messages.create')
+    #mocker.patch('client.messages.create')
     send_sms(3, 3, 3)
     client.messages.create.assert_called_once_with(3,3,3)
 
