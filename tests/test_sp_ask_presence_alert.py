@@ -57,16 +57,7 @@ def test_get_presence():
 def test_find_opening_hours_for_today():
     time_now = datetime.datetime.today().weekday()
     result = find_opening_hours_for_today(time_now)    
-    assert [10, 19] == result   
-
-def test_normalize_sms_address():
-        twilio = _twilio_client()
-        assert(twilio._normalize_sms_address(
-            sms_phone_number='555-123-4567'
-        ),
-            '+15551234567')
-
-
+    assert [10, 19] == result  
 
 @pytest.mark.skip(reason="Need a valid target to patch for Client")
 def test_send_sms(mocker):
