@@ -127,6 +127,7 @@ def send_sms_during_off_hours(min_alert_minute):
         min_alert_minute {[int]} -- Minimum minute of uptime
     """
     result = Service.select().where((Service.status !="unavailable"))
+    #don't send sms for those status
     off_hours_status = ['dnd', 'unavailable', 'away']
     if (len(result) >= min_alert_minute) :
         clavardez = len(Service.select().where((Service.status not in off_hours_status) & (Service.queue=="clavardez")))
