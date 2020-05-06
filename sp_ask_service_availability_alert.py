@@ -66,14 +66,14 @@ def check_service_and_insert_to_db():
             app_log.error("Can't add value in database"+ str(e) )
             pass
 
-def check_if_the_service_open():
+def check_if_the_service_open(my_current_time=datetime.today().hour):
     """Verify if the service is currently open
 
     Returns:
         [Boolean] -- If the service is open?
     """    
     start, end = find_opening_hours_for_today()
-    current_hour = datetime.today().hour
+    current_hour = my_current_time
 
     result = (current_hour >= start) and (current_hour <= end)
     return result
@@ -161,17 +161,7 @@ def verify_Ask_service(min_alert_minute):
     if is_within_Ask_openning_hours == False:
         send_sms_during_off_hours(min_alert_minute)
 
-def is_hour_between(start, end, now):
-    is_between = False
-
-    is_between |= start <= now <= end
-    is_between |= end < start and (start <= now or now <= end)
-
-    return is_between
-
-def find_opening_hours_for_today():
-    day = datetime.today().weekday()
-
+def find_opening_hours_for_today(day=datetime.today().weekday()):
     #Monday to Friday
     if day >= 0 and day < 4:
         return [10, 19]
