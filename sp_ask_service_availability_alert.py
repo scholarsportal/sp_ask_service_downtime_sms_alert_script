@@ -127,10 +127,11 @@ def send_sms_during_off_hours(min_alert_minute):
         min_alert_minute {[int]} -- Minimum minute of uptime
     """
     result = Service.select().where((Service.status !="unavailable"))
+    off_hours_status = ['dnd', 'unavailable', 'away']
     if (len(result) >= min_alert_minute) :
-        clavardez = len(Service.select().where((Service.status !="unavailable") & (Service.queue=="clavardez")))
-        sms = len(Service.select().where((Service.status !="unavailable") & (Service.queue=="scholars-portal-txt")))
-        web = len(Service.select().where((Service.status !="unavailable") & (Service.queue=="scholars-portal")))
+        clavardez = len(Service.select().where((Service.status not in off_hours_status) & (Service.queue=="clavardez")))
+        sms = len(Service.select().where((Service.status not in off_hours_status) & (Service.queue=="scholars-portal-txt")))
+        web = len(Service.select().where((Service.status not in off_hours_status) & (Service.queue=="scholars-portal")))
         print("Ask Service Uptime\nDuring Off Hours\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms))
         send_sms(web, clavardez, sms)
         app_log.info("Have sent an SMS during OFF hours")
