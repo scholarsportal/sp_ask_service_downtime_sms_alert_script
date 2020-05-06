@@ -1,6 +1,19 @@
-from sp_ask_service_downtime_sms_alert_script import __version__
+from sp_ask_service_availability_alert import __version__
+from sp_ask_service_availability_alert import Service
+from sp_ask_service_availability_alert import check_service_and_insert_to_db
+from sp_ask_service_availability_alert import check_if_the_service_open
+from sp_ask_service_availability_alert import get_presence
+from sp_ask_service_availability_alert import send_sms
+from sp_ask_service_availability_alert import send_sms_during_off_hours
+from sp_ask_service_availability_alert import verify_Ask_service
+from sp_ask_service_availability_alert import is_hour_between
+from sp_ask_service_availability_alert import find_opening_hours_for_today
+from sp_ask_service_availability_alert import service_availability_alert
+from sp_ask_service_availability_alert import __version__
+from sp_ask_service_availability_alert import __version__
+from sp_ask_service_availability_alert import __version__
+from sp_ask_service_availability_alert import db
 
-import 
 
 def test_version():
-    assert __version__ == '0.1.0'
+    assert __version__ == '0.1.3'

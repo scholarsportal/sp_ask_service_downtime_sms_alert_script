@@ -24,6 +24,12 @@ setup:
 info-setup:
 	echo "\nRun this python app\n"
 
+.PHONY: pytest
+run:
+	poetry run pytest -v
+info-run:
+	echo "\nRunning Tests\n"
+
 
 .PHONY: run
 run:
