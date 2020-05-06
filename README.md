@@ -53,6 +53,7 @@ ACCOUNT_SID="Twillio account sid"
 AUTH_TOKEN="twillio auth token"
 FROM="phone number"
 TO="phone number"
+ENVIRONMENT="STAGING or PRODUCTION"
 ```
 
 ## Docker
