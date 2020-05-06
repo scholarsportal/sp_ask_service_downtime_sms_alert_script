@@ -9,9 +9,6 @@ from sp_ask_service_availability_alert import verify_Ask_service
 from sp_ask_service_availability_alert import is_hour_between
 from sp_ask_service_availability_alert import find_opening_hours_for_today
 from sp_ask_service_availability_alert import service_availability_alert
-from sp_ask_service_availability_alert import __version__
-from sp_ask_service_availability_alert import __version__
-from sp_ask_service_availability_alert import __version__
 from sp_ask_service_availability_alert import db
 
 
