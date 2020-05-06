@@ -25,9 +25,9 @@ info-setup:
 	echo "\nRun this python app\n"
 
 .PHONY: pytest
-run:
+pytest:
 	poetry run pytest -v
-info-run:
+info-pytest:
 	echo "\nRunning Tests\n"
 
 
