@@ -12,7 +12,7 @@
 <p>
 Script to ping our 3  main LibraryH3lp services (web, clavardez, sms) and if any of those queues are closed during standard Ask opening Hours for more than 10 minutes then this script will send an SMS to the Scholars-Portal Ask coordinator
 <br/>
-If the service is close and one of the queue is still open due that an operator had stay connected then an SMS notification will be sent to the SP Ask coordinator
+If the service is close and one of the queue is still open due that an operator had stayed connected then an SMS notification will be sent to the SP Ask coordinator
 </p>
 
 
