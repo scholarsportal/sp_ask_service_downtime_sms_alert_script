@@ -34,7 +34,7 @@ class Service(Model):
     """Database Table
         Record queue/service and their Status to
         AVAILABLE,
-        UNAVAILABLE, 
+        UNAVAILABLE,
     """
     queue = CharField(max_length=30, null=False)
     status = CharField(max_length=30, null=False)
@@ -53,7 +53,7 @@ def check_service_and_insert_to_db():
     """Each minutes during Opening Hours
         a script ping the Main
         queues to know their status
-        
+
         -scholars-portal-txt
         -scholars-portal
         -clavardez
@@ -73,7 +73,7 @@ def check_if_the_service_open(my_current_time=datetime.today().hour):
 
     Returns:
         [Boolean] -- If the service is open?
-    """    
+    """
     start, end = find_opening_hours_for_today()
     current_hour = my_current_time
 
@@ -95,7 +95,7 @@ def get_presence():
     for service in query:
         print(service)
 
-def send_sms(web, clavardez, sms):
+def send_sms(sms_message_content):
     """Will send an SMS to Scholars Portal - Ask Coordinator
 
     SECRETS: Require .env file or Environment variables
@@ -105,33 +105,34 @@ def send_sms(web, clavardez, sms):
         clavardez {int} -- Number of Downtime in minutes
         sms {int} -- Number of Downtime in minutes
     """
-    time_now = time.strftime('%X %Z %x')
-
-
     client = Client(account_sid, auth_token)
     message = client.messages.create(
-            body="Sent: {0}\nAsk Service Downtime\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms),
+            body=sms_message_content,
         from_=env("FROM"),
         to=env("TO")
     )
 
 def send_sms_during_off_hours(min_alert_minute):
-    """Send SMS is the status is different than 
+    """Send SMS is the status is different than
     UNAVAILABLE
     during off hours
 
     Arguments:
         min_alert_minute {[int]} -- Minimum minute of uptime
     """
-    result = Service.select().where((Service.status !="unavailable"))
     #don't send sms for those status
     off_hours_status = ['dnd', 'unavailable', 'away']
-    if (len(result) >= min_alert_minute) :
-        clavardez = len(Service.select().where((Service.status not in off_hours_status) & (Service.queue=="clavardez")))
-        sms = len(Service.select().where((Service.status not in off_hours_status) & (Service.queue=="scholars-portal-txt")))
-        web = len(Service.select().where((Service.status not in off_hours_status) & (Service.queue=="scholars-portal")))
-        print("Ask Service Uptime\nDuring Off Hours\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms))
-        send_sms(web, clavardez, sms)
+    result = Service.select().where((Service.status not in off_hours_status))
+    
+    # if openned more than 3 minutes
+    if (len(result) >= 3) :
+        clavardez = len(Service.select().where((Service.status != "unavailable") & (Service.queue=="clavardez")))
+        sms = len(Service.select().where((Service.status != "unavailable") & (Service.queue=="scholars-portal-txt")))
+        web = len(Service.select().where((Service.status != "unavailable") & (Service.queue=="scholars-portal")))
+        
+        time_now = time.strftime('%X %Z %x')
+        sms_message_content ="Sent: {0}\nOFF HOURS \nAsk Service Uptime\nDuring Off Hours\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms)
+        send_sms(sms_message_content)
         app_log.info("Have sent an SMS during OFF hours")
 
 def verify_Ask_service(min_alert_minute):
@@ -153,8 +154,10 @@ def verify_Ask_service(min_alert_minute):
             clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
             sms = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt")))
             web = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal")))
-            print("Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms))
-            send_sms(web, clavardez, sms)
+
+            time_now = time.strftime('%X %Z %x')
+            sms_message_content ="Ask Service Downtime\n{0}\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(web, clavardez, sms)
+            send_sms(sms_message_content)
             app_log.info("Have sent an SMS")
             sys.exit()
 
@@ -178,7 +181,7 @@ def service_availability_alert():
     """Main function
     Verify the status of all service
     """
-    min_alert_minute = 8
+    min_alert_minute = 10
     time_to_sleep = 60
     environment = env("ENVIRONMENT", "STAGING")
     if environment == "STAGING":
@@ -187,21 +190,21 @@ def service_availability_alert():
         time_to_sleep = 5
 
     Service.create_table()
-    Service.delete().execute() 
+    Service.delete().execute()
     counter = 0
     while counter < min_alert_minute:
         get_presence()
         time.sleep(time_to_sleep) #sleep one minute
         app_log.info("sleeping for {0} seconds".format(time_to_sleep))
         counter +=1
-    
+
     # After 10 min .. check this
     verify_Ask_service(min_alert_minute)
 
 if __name__ == '__main__':
     app_log.info("Enter sms-app")
     is_within_Ask_openning_hours = check_if_the_service_open()
-    
+
     # Run only on Ask open hours
     if is_within_Ask_openning_hours:
         app_log.info("within Ask opening hours")
