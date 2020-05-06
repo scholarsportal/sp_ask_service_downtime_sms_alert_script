@@ -131,23 +131,26 @@ def verify_Ask_service(min_alert_minute):
     Arguments:
         min_alert_minute {int} -- Minimum minute of downtime
     """
-    #retrieve how many time those services were 'unavailable'
-    fr_result = Service.select().where((Service.status !="available") & (Service.queue=="clavardez"))
-    sms_result = Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt"))
-
-    if (len(fr_result) >= min_alert_minute) | (len(sms_result) >= min_alert_minute) :
-        clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
-        sms = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt")))
-        web = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal")))
-        print("Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms))
-        send_sms(web, clavardez, sms)
-        app_log.info("Have sent an SMS")
-        sys.exit()
-
-    #if OFF hours
     start, end = find_opening_hours_for_today()
     current_hour = datetime.today().hour
-    if (current_hour <= start) and (current_hour >= end):
+    ask_opening_hours = (current_hour >= start) and (current_hour <= end)
+
+    if ask_opening_hours == True:
+        #retrieve how many time those services were 'unavailable'
+        fr_result = Service.select().where((Service.status !="available") & (Service.queue=="clavardez"))
+        sms_result = Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt"))
+
+        if (len(fr_result) >= min_alert_minute) | (len(sms_result) >= min_alert_minute) :
+            clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
+            sms = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt")))
+            web = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal")))
+            print("Ask Service Downtime\nweb-en:\t{0} min\nweb-fr:\t{1} min\nSMS:\t{2} min\n".format(web, clavardez, sms))
+            send_sms(web, clavardez, sms)
+            app_log.info("Have sent an SMS")
+            sys.exit()
+
+    #if OFF hours
+    if ask_opening_hours == False:
         send_sms_during_off_hours(min_alert_minute)
 
 def is_hour_between(start, end, now):
@@ -181,8 +184,8 @@ def service_availability_alert():
     environment = env("ENVIRONMENT", "STAGING")
     if environment == "STAGING":
         print("Staging environment")
-        min_alert_minute = 5
-        time_to_sleep = 10
+        min_alert_minute = 3
+        time_to_sleep = 5
 
     Service.create_table()
     Service.delete().execute() 
