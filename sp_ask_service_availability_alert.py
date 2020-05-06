@@ -103,11 +103,7 @@ def send_sms(web, clavardez, sms):
         clavardez {int} -- Number of Downtime in minutes
         sms {int} -- Number of Downtime in minutes
     """
-    now = datetime.now().time()
-    hour = now.hour
-    minute = now.minute
-    second = now.minute
-    time_now = str(hour) +":"+ str(minute) + ":" + str(second)
+    time_now = time.strftime('%X %Z %x')
 
     account_sid = env("ACCOUNT_SID")
     auth_token = env("AUTH_TOKEN")
