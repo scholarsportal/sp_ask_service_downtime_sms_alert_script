@@ -21,7 +21,7 @@ auth_token = env("AUTH_TOKEN", 'rter')
 from log_setup import get_log_formatter
 app_log = get_log_formatter()
 
-queues = ['scholars-portal', "scholars-portal-txt", "clavardez"]
+queues = ['practice-webinars', 'scholars-portal', "scholars-portal-txt", "clavardez"]
 start_url = "https://ca.libraryh3lp.com/presence/jid/"
 end_url =  "/chat.ca.libraryh3lp.com/text"
 
@@ -105,12 +105,17 @@ def send_sms(sms_message_content):
         clavardez {int} -- Number of Downtime in minutes
         sms {int} -- Number of Downtime in minutes
     """
-    client = Client(account_sid, auth_token)
-    message = client.messages.create(
-            body=sms_message_content,
-        from_=env("FROM"),
-        to=env("TO")
-    )
+    try:
+        app_log.info("sending sms")
+        print("sending sms")
+        client = Client(account_sid, auth_token)
+        message = client.messages.create(
+                body=sms_message_content,
+            from_=env("FROM"),
+            to=env("TO")
+        )
+    except:
+        app_log.warning("ERROR while sending sms")
 
 def send_sms_during_off_hours(min_alert_minute):
     """Send SMS is the status is different than
@@ -131,7 +136,11 @@ def send_sms_during_off_hours(min_alert_minute):
         web = len(Service.select().where((Service.status != "unavailable") & (Service.queue=="scholars-portal")))
         
         time_now = time.strftime('%X %Z %x')
-        sms_message_content ="Sent: {0}\nOFF HOURS \nAsk Service Uptime\nDuring Off Hours\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms)
+        try:
+            sms_message_content ="Sent: {0}\nOFF HOURS \nAsk Service Uptime\nDuring Off Hours\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms)
+        except:
+            app_log.warning("Can't write sms_message_content in off-hours")
+        app_log.info("Will send a message off hours ")
         send_sms(sms_message_content)
         app_log.info("Have sent an SMS during OFF hours")
 
@@ -149,14 +158,28 @@ def verify_Ask_service(min_alert_minute):
         #retrieve how many time those services were 'unavailable'
         fr_result = Service.select().where((Service.status !="available") & (Service.queue=="clavardez"))
         sms_result = Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt"))
+        any_service = Service.select().where((Service.status !="available"))
 
-        if (len(fr_result) >= min_alert_minute) | (len(sms_result) >= min_alert_minute) :
+        
+        predicate_fr_result = (len(fr_result) >= min_alert_minute) 
+        predicate_any_service = (len(any_service) >= min_alert_minute)
+        predicate_sms_result = (len(sms_result) >= min_alert_minute)
+        list_of_service = [predicate_fr_result, predicate_sms_result, predicate_sms_result]
+
+        
+
+
+        if  any(x==False for x in list_of_service):
             clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
             sms = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt")))
             web = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal")))
 
             time_now = time.strftime('%X %Z %x')
-            sms_message_content ="Ask Service Downtime\n{0}\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(web, clavardez, sms)
+            try:
+                sms_message_content ="Ask Service Downtime\n{0}\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms)
+            except:
+                app_log.warning("Can't write sms_message_content in regular service hour")
+            app_log.info("Will send a message ")
             send_sms(sms_message_content)
             app_log.info("Have sent an SMS")
             sys.exit()
@@ -185,9 +208,10 @@ def service_availability_alert():
     time_to_sleep = 60
     environment = env("ENVIRONMENT", "STAGING")
     if environment == "STAGING":
+        app_log.warning("Staging environment")
         print("Staging environment")
         min_alert_minute = 3
-        time_to_sleep = 5
+        time_to_sleep = 3
 
     Service.create_table()
     Service.delete().execute()
