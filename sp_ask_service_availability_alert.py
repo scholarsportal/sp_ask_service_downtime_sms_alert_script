@@ -138,6 +138,7 @@ def send_sms_during_off_hours(min_alert_minute):
     #don't send sms for those status
     off_hours_status = ['dnd', 'unavailable', 'away']
     result = Service.select().where((Service.status not in off_hours_status))
+    #TODO select all queues exceppt practice queues
     
     # if openned more than 3 minutes
     if (len(result) >= 3) :
