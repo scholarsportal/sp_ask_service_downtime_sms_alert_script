@@ -5,6 +5,7 @@ from datetime import timedelta
 from datetime import datetime
 import time
 import sys
+import atexit
 
 #package installed
 from peewee import *
@@ -29,6 +30,15 @@ end_url =  "/chat.ca.libraryh3lp.com/text"
 db = SqliteDatabase('presence.db', pragmas={
     'journal_mode': 'wal',
     'cache_size': -1024 * 64})
+
+@atexit.register
+def delete_table_at_exit():
+    try:
+        app_log.info("delete table at exit")
+        print("delete table at exit")
+        Service.delete().execute()
+    except:
+        app_log.warning("unable to delete table")
 
 class Service(Model):
     """Database Table
