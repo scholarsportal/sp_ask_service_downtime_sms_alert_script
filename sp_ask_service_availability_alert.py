@@ -158,18 +158,26 @@ def verify_Ask_service(min_alert_minute):
         #retrieve how many time those services were 'unavailable'
         fr_result = Service.select().where((Service.status !="available") & (Service.queue=="clavardez"))
         sms_result = Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt"))
+        #any_service_ is useful for dev testing
         any_service = Service.select().where((Service.status !="available"))
 
         
         predicate_fr_result = (len(fr_result) >= min_alert_minute) 
         predicate_any_service = (len(any_service) >= min_alert_minute)
         predicate_sms_result = (len(sms_result) >= min_alert_minute)
-        list_of_service = [predicate_fr_result, predicate_sms_result, predicate_sms_result]
+        list_of_service = [predicate_fr_result, predicate_sms_result]
+        list_of_service_staging = [predicate_fr_result, predicate_any_service, predicate_sms_result]
 
         
+        environment = env("ENVIRONMENT", "STAGING")
+        if environment == "STAGING":
+            result_service = any(x==True for x in list_of_service_staging)
+        else:
+            result_service = any(x==True for x in list_of_service)
 
+        #breakpoint()
 
-        if  any(x==False for x in list_of_service):
+        if  result_service:
             clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
             sms = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt")))
             web = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal")))
