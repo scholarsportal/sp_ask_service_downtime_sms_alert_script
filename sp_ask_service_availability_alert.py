@@ -135,9 +135,10 @@ def send_sms_during_off_hours(min_alert_minute):
     Arguments:
         min_alert_minute {[int]} -- Minimum minute of uptime
     """
+    
     #don't send sms for those status
     off_hours_status = ['dnd', 'unavailable', 'away']
-    result = Service.select().where((Service.status not in off_hours_status) & (Service.queue !="practice-webinars"))
+    result = Service.select().where((Service.status == 'available'))
 
     
     # if openned more than 3 minutes
