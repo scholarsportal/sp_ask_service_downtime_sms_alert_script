@@ -22,7 +22,12 @@ auth_token = env("AUTH_TOKEN", 'rter')
 from log_setup import get_log_formatter
 app_log = get_log_formatter()
 
-queues = ['practice-webinars', 'scholars-portal', "scholars-portal-txt", "clavardez"]
+environment = env("ENVIRONMENT", "STAGING")
+if environment == "STAGING":
+    print("Staging environment")
+    queues = ['practice-webinars', 'scholars-portal']
+else:
+    queues = ['scholars-portal', "scholars-portal-txt", "clavardez"]
 start_url = "https://ca.libraryh3lp.com/presence/jid/"
 end_url =  "/chat.ca.libraryh3lp.com/text"
 
@@ -180,14 +185,11 @@ def verify_Ask_service(min_alert_minute):
         list_of_service = [predicate_fr_result, predicate_sms_result]
         list_of_service_staging = [predicate_fr_result, predicate_any_service, predicate_sms_result]
 
-        
-        environment = env("ENVIRONMENT", "STAGING")
         if environment == "STAGING":
             result_service = any(x==True for x in list_of_service_staging)
         else:
             result_service = any(x==True for x in list_of_service)
 
-        #breakpoint()
 
         if  result_service:
             clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
@@ -226,7 +228,6 @@ def service_availability_alert():
     """
     min_alert_minute = 10
     time_to_sleep = 60
-    environment = env("ENVIRONMENT", "STAGING")
     if environment == "STAGING":
         app_log.warning("Staging environment")
         print("Staging environment")
