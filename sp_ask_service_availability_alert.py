@@ -22,12 +22,14 @@ auth_token = env("AUTH_TOKEN", 'rter')
 from log_setup import get_log_formatter
 app_log = get_log_formatter()
 
+#Constant
 environment = env("ENVIRONMENT", "STAGING")
 if environment == "STAGING":
-    print("Staging environment")
     queues = ['practice-webinars', 'scholars-portal']
 else:
     queues = ['scholars-portal', "scholars-portal-txt", "clavardez"]
+
+
 start_url = "https://ca.libraryh3lp.com/presence/jid/"
 end_url =  "/chat.ca.libraryh3lp.com/text"
 
