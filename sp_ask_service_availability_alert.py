@@ -259,4 +259,5 @@ if __name__ == '__main__':
         service_availability_alert()
     else:
         print("off hours")
+        app_log.info("Ask off-hours")
         service_availability_alert()
