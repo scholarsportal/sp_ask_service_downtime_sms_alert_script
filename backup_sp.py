@@ -147,7 +147,7 @@ def send_sms(sms_message_content, schedule):
     except:
         app_log.warning("ERROR while sending sms")
 
-def send_sms_during_off_hours():
+def send_sms_during_off_hours(min_alert_minute):
     """Send SMS is the status is different than
     UNAVAILABLE
     during off hours
@@ -176,7 +176,7 @@ def send_sms_during_off_hours():
         send_sms(sms_message_content, "OFF Hours")
         app_log.info("Have sent an SMS during OFF hours")
 
-def should_send_sms():
+def verify_Ask_service(min_alert_minute):
     """If Ask Service is down for at least 10 minutes (min_alert_minute)
         during Ask opening hours
             then send a SMS
@@ -206,23 +206,25 @@ def should_send_sms():
         else:
             result_service = any(x==True for x in list_of_service)
 
-        return result_service
 
-def send_sms_during_opening_hours():
-    clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
-    sms = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt")))
-    web = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal")))
+        if  result_service:
+            clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
+            sms = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal-txt")))
+            web = len(Service.select().where((Service.status !="available") & (Service.queue=="scholars-portal")))
 
-    time_now = time.strftime('%X %Z %x')
-    try:
-        sms_message_content ="Ask Service Downtime\n{0}\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms)
-    except:
-        app_log.warning("Can't write sms_message_content in regular service hour")
-    app_log.info("Will send a message ")
-    send_sms(sms_message_content, "Ask hours")
-    app_log.info("Have sent an SMS")
+            time_now = time.strftime('%X %Z %x')
+            try:
+                sms_message_content ="Ask Service Downtime\n{0}\nweb-en:\t{1} min\nweb-fr:\t{2} min\nSMS:\t{3} min\n".format(time_now, web, clavardez, sms)
+            except:
+                app_log.warning("Can't write sms_message_content in regular service hour")
+            app_log.info("Will send a message ")
+            send_sms(sms_message_content, "Ask hours")
+            app_log.info("Have sent an SMS")
+            sys.exit()
 
-
+    #if OFF hours
+    if is_within_Ask_openning_hours == False:
+        send_sms_during_off_hours(min_alert_minute)
 
 def find_opening_hours_for_today(day=datetime.today().weekday()):
     #Monday to Friday
@@ -260,15 +262,10 @@ if __name__ == '__main__':
         print("whitin Ask opening hours")
         service_availability()
         # After 10 min .. check this
-        result = should_send_sms()
-        #if OFF hours
-        if result:
-            send_sms_during_opening_hours
-
+        verify_Ask_service(min_alert_minute)
     else:
         print("off hours")
         app_log.info("Ask off-hours")
         service_availability()
         # After 10 min .. check this
-        result = should_send_sms()
-        send_sms_during_off_hours()
+        verify_Ask_service(min_alert_minute)
