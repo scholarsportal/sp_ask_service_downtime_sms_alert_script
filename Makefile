@@ -18,10 +18,17 @@ info-readme:
 
 .PHONY: setup
 setup:
+	pip install poetry
 	poetry install -v
 	poetry run python sp_ask_service_availability_alert.py
 info-setup:
 	echo "\nRun this python app\n"
+
+.PHONY: pytest
+pytest:
+	poetry run pytest -v
+info-pytest:
+	echo "\nRunning Tests\n"
 
 
 .PHONY: run
@@ -39,7 +46,7 @@ info-packages:
 .PHONY: github
 github:
 	echo "--On Mac Open this github repository url--"
-	open https://github.com/guinslym/sp_ask_presence_alert
+	open https://github.com/scholarsportal/sp_ask_service_downtime_sms_alert_script
 info-github:
 	echo "\nOpen this github repository url \n"
 

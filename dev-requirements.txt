@@ -7,3 +7,6 @@ pytz
 pytest
 pdbpp
 ptpython
+pytest-sugar
+pytest-mock
+freezegun

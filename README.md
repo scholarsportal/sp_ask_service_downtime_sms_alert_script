@@ -9,8 +9,11 @@
 
 ## SP ASK Service SMS Alert script
 
+<p>
 Script to ping our 3  main LibraryH3lp services (web, clavardez, sms) and if any of those queues are closed during standard Ask opening Hours for more than 10 minutes then this script will send an SMS to the Scholars-Portal Ask coordinator
 <br/>
+If the service is close and one of the queue is still open due that an operator had stayed connected then an SMS notification will be sent to the SP Ask coordinator
+</p>
 
 
 ## Screenshots
@@ -39,7 +42,8 @@ make setup
 make run
 ```
 In addition it is useful to execute it from **crontab**
-`*/15 * * * * python sp_ask_service_availability_alert.py`
+`*/10 * * * * python sp_ask_service_availability_alert.py`
+
 
 ## Requirement
 1.  This script requires a TWILIO account credentials to send SMS 
@@ -52,15 +56,13 @@ ACCOUNT_SID="Twillio account sid"
 AUTH_TOKEN="twillio auth token"
 FROM="phone number"
 TO="phone number"
+ENVIRONMENT="STAGING or PRODUCTION"
 ```
 
 ## Docker
 
 ```text
-
 docker build -t ask-sms-app .
-
-
 ```
 
 
@@ -69,5 +71,8 @@ docker build -t ask-sms-app .
 1.  Replace SMS with email to ASK SP inbox
 2.  Add tests
 3.  Add Cronjob in Dockerfile
-4.  Move the logic to create a Mobile app
+4.  Move the logic to create a [Mobile app](https://github.com/guinslym/sp_ask_dashboard_mobile_app_layout)
+
+
+
 
