@@ -29,7 +29,7 @@ environment = env("ENVIRONMENT", "STAGING")
 if environment == "STAGING":
     queues = ["practice-webinars", "scholars-portal"]
 else:
-    queues = ["scholars-portal", "scholars-portal-txt", "clavardez"]
+    queues = ["scholars-portal", "scholars-portal-txt", "clavardez", "practice-webinars"]
 
 
 start_url = "https://ca.libraryh3lp.com/presence/jid/"
