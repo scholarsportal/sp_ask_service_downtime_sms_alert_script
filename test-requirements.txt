@@ -1,0 +1,12 @@
+-r requirements.txt
+pytest
+pytest-sugar
+pytest-mock
+coverage==4.5.2
+pytest-flakes==2.0.0
+pytest-pep8
+pytest-pythonpath
+freezegun
+pytest-cov
+black
+
