@@ -176,7 +176,7 @@ def send_sms_during_off_hours():
         send_sms(sms_message_content, "OFF Hours")
         app_log.info("Have sent an SMS during OFF hours")
 
-def should_send_sms():
+def should_send_sms(this_hour):
     """If Ask Service is down for at least 10 minutes (min_alert_minute)
         during Ask opening hours
             then send a SMS
@@ -184,8 +184,8 @@ def should_send_sms():
     Arguments:
         min_alert_minute {int} -- Minimum minute of downtime
     """
-    hour = datetime.now().hour
-    is_within_Ask_openning_hours = check_if_the_service_open(hour)
+
+    is_within_Ask_openning_hours = check_if_the_service_open(this_hour)
 
     if is_within_Ask_openning_hours == True:
         #retrieve how many time those services were 'unavailable'
@@ -207,6 +207,14 @@ def should_send_sms():
             result_service = any(x==True for x in list_of_service)
 
         return result_service
+    #else
+    if is_within_Ask_openning_hours == False:
+        result = Service.select().where((Service.status == 'available'))
+
+        if (len(result) >= min_alert_minute):
+            return True
+        else:
+            return False
 
 def send_sms_during_opening_hours():
     clavardez = len(Service.select().where((Service.status !="available") & (Service.queue=="clavardez")))
@@ -260,7 +268,8 @@ if __name__ == '__main__':
         print("whitin Ask opening hours")
         service_availability()
         # After 10 min .. check this
-        result = should_send_sms()
+        hour = datetime.now().hour
+        result = should_send_sms(hour)
         #if OFF hours
         if result:
             send_sms_during_opening_hours
@@ -270,5 +279,7 @@ if __name__ == '__main__':
         app_log.info("Ask off-hours")
         service_availability()
         # After 10 min .. check this
-        result = should_send_sms()
-        send_sms_during_off_hours()
+        hour = datetime.now().hour
+        result = should_send_sms(hour)
+        if result:
+            send_sms_during_off_hours()

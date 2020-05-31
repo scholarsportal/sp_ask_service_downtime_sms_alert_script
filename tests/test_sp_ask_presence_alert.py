@@ -1,4 +1,3 @@
-
 #tested
 from sp_ask_service_availability_alert import __version__
 from sp_ask_service_availability_alert import Service
@@ -25,6 +24,69 @@ import unittest
 import twilio
 from twilio.rest import Client
 import pytest
+
+class TestTimeWhithinHour(object):
+
+    def test_service_is_open(self):
+        this_date = datetime.datetime(2020,5,31,13,21,34)
+        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
+        assert is_within_Ask_openning_hours == True
+
+    def test_should_send_sms(self):
+        this_date = datetime.datetime(2020,5,31,13,21,34)
+        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
+        service_availability()
+        #Service.create_table()
+        Service.delete().execute()
+        Service.insert(queue='scholars-portal', status='unavailable').execute()
+        Service.insert(queue='scholars-portal', status='unavailable').execute()
+        Service.insert(queue='scholars-portal', status='unavailable').execute()
+        result = should_send_sms(this_date.hour)
+        assert result == True
+
+    def test_should_not_send_sms(self):
+        this_date = datetime.datetime(2020,5,31,13,21,34)
+        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
+        service_availability()
+        Service.create_table()
+        Service.delete().execute()
+        Service.insert(queue='scholars-portal', status='available').execute()
+        Service.insert(queue='scholars-portal', status='available').execute()
+        Service.insert(queue='scholars-portal', status='available').execute()
+        result = should_send_sms(this_date.hour)
+        assert result == False
+
+class TestTimeOFFHour(object):
+
+    def test_service_is_close(self):
+        this_date = datetime.datetime(2020,5,31,11,21,34)
+        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
+        assert is_within_Ask_openning_hours == False
+
+    def test_should_not_send_sms(self):
+        this_date = datetime.datetime(2020,5,31,11,21,34)
+        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
+        service_availability()
+        Service.create_table()
+        Service.delete().execute()
+        Service.insert(queue='scholars-portal', status='unavailable').execute()
+        Service.insert(queue='scholars-portal', status='unavailable').execute()
+        Service.insert(queue='scholars-portal', status='unavailable').execute()
+        result = should_send_sms(this_date.hour)
+        assert result == False
+
+    def test_should_send_sms(self):
+        this_date = datetime.datetime(2020,5,31,11,21,34)
+        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
+        service_availability()
+        Service.create_table()
+        Service.delete().execute()
+        Service.insert(queue='scholars-portal', status='available').execute()
+        Service.insert(queue='scholars-portal', status='available').execute()
+        Service.insert(queue='scholars-portal', status='available').execute()
+        result = should_send_sms(this_date.hour)
+        assert result == True
+
 
 def test_version():
     assert __version__ == '0.1.3'
@@ -69,34 +131,7 @@ def test_find_opening_hours_for_today():
     result = find_opening_hours_for_today(time_now)
     assert [10, 19] == result
 
-@pytest.mark.skip(reason="Need a valid target to patch for Client")
-def test_send_sms_during_off_hours():
-    client = Client("9999", "909099")
-    send_sms_during_off_hours(3, 3, 3)
-    client.messages.create.assert_called_once_with(3,3,3)
 
 
-class TestTimeWhithinHour(object):
 
-    def test_service_is_open(self):
-        this_date = datetime.datetime(2020,5,31,13,21,34)
-        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
-        assert is_within_Ask_openning_hours == True
 
-    def test_service_availability(self):
-        this_date = datetime.datetime(2020,5,31,13,21,34)
-        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
-        service_availability()
-        Service.insert(queue='scholars-portal', status='unavailable').execute()
-        Service.insert(queue='scholars-portal', status='unavailable').execute()
-        Service.insert(queue='scholars-portal', status='unavailable').execute()
-        result = should_send_sms()
-        send_sms_during_opening_hours()
-        assert is_within_Ask_openning_hours == True
-
-class TestTimeOFFHour(object):
-
-    def test_service_is_close(self):
-        this_date = datetime.datetime(2020,5,31,11,21,34)
-        is_within_Ask_openning_hours = check_if_the_service_open(this_date.hour)
-        assert is_within_Ask_openning_hours == False
