@@ -62,7 +62,9 @@ ENVIRONMENT="STAGING or PRODUCTION"
 ## Docker
 
 ```text
-docker-compose run smsapp-test
+docker-compose run smsapp
+# to stop
+## docker ps -a -q  --filter ancestor=test_smsapp
 
 
 ----------- coverage: platform linux, python 3.7.7-final-0 -----------
