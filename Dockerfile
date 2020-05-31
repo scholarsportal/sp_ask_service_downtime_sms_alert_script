@@ -8,4 +8,3 @@ RUN pip install -r test-requirements.txt
 
 RUN ls
 CMD pytest -v /app/
-#ENTRYPOINT /entrypoint.sh

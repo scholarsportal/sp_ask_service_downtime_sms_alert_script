@@ -29,7 +29,7 @@ This is a mockup, it will only send if one of the services has been down for at 
 
 ```
 ## using pip 
-pip install -r requirements.txt
+pip install -r test-requirements.txt
 python sp_ask_service_availability_alert.py
 
 ## or using poetry
@@ -62,7 +62,24 @@ ENVIRONMENT="STAGING or PRODUCTION"
 ## Docker
 
 ```text
-docker build -t ask-sms-app .
+docker-compose run smsapp-test
+
+
+----------- coverage: platform linux, python 3.7.7-final-0 -----------
+Name                                   Stmts   Miss  Cover
+----------------------------------------------------------
+log_setup.py                              28      0   100%
+sp_ask_service_availability_alert.py     163     66    60%
+tests/__init__.py                          0      0   100%
+tests/test_sp_ask_presence_alert.py      104      0   100%
+----------------------------------------------------------
+TOTAL                                    295     66    78%
+Coverage HTML written to dir coverage-output/coverage/html
+Coverage XML written to file coverage-output/coverage/cov_odesi_coverage.xml
+
+
+Results (38.78s):
+      13 passed
 ```
 
 
