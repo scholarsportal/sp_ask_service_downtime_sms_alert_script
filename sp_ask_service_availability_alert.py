@@ -26,10 +26,11 @@ app_log = get_log_formatter()
 
 # Constant
 environment = env("ENVIRONMENT", "STAGING")
+print(environment)
 if environment == "STAGING":
     queues = ["practice-webinars", "scholars-portal"]
 else:
-    queues = ["scholars-portal", "scholars-portal-txt", "clavardez", "practice-webinars"]
+    queues = ["scholars-portal", "scholars-portal-txt", "clavardez"]
 
 
 start_url = "https://ca.libraryh3lp.com/presence/jid/"
@@ -53,7 +54,6 @@ else:
     min_alert_minute = 10
     time_to_sleep = 60
     db = get_db("presence.db")
-
 
 @atexit.register
 def delete_table_at_exit():
@@ -168,6 +168,7 @@ def send_sms_during_off_hours():
     # don't send sms for those status
     off_hours_status = ["dnd", "unavailable", "away"]
     result = Service.select().where((Service.status == "available"))
+    print(result)
 
     # if openned more than 3 minutes
     if len(result) >= 3:
@@ -185,6 +186,11 @@ def send_sms_during_off_hours():
         web = len(
             Service.select().where(
                 (Service.status != "unavailable") & (Service.queue == "scholars-portal")
+            )
+        )
+        practice = len(
+            Service.select().where(
+                (Service.status != "unavailable") & (Service.queue == "practice-webinars")
             )
         )
 
